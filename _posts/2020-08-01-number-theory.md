@@ -9,7 +9,7 @@ title: "一些基础的数论知识"
 
 若 $ b = 0 $，则显然 $ \;\text{gcd}\;(a, 0) = a $。
 
-若 $ b \neq 0 $，设 $c$ 为 $a, b$ 的任意公因数，因为 $ a \;\text{mod}\; b = a - \lfloor \frac{a}{b} \rfloor c $，所以 $ c \;\|\; (a \;\text{mod}\; b) $。
+若 $ b \neq 0 $，设 $c$ 为 $a, b$ 的任意公因数，因为 $ a \;\text{mod}\; b = a - \lfloor \frac{a}{b} \rfloor b $，所以 $ c \;\|\; (a \;\text{mod}\; b) $。
 因此，$ c $ 也是 $ b, a \;\text{mod}\; b $ 的公因数。我们就找到了一种递归解法：$ \;\text{gcd}\;(a, b) = \;\text{gcd}\;(b, a \;\text{mod}\;b) $。
 
 由于 $ a > b > a \;\text{mod}\; b \geq 0 $，因此这个递归解法的两个参数分别是严格递减的，第二个参数会在有限步内变为0，得到递归的基础情况。
