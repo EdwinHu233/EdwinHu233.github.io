@@ -23,7 +23,7 @@ email: hujingbo@pku.edu.cn
 description: >- # this means to ignore newlines until "baseurl:"
     这是一个很菜的人的博客。
 baseurl: "" # the subpath of your site, e.g. /blog
-url: "" # the base hostname & protocol for your site, e.g. http://example.com
+url: "https://edwinhu233.github.io" # the base hostname & protocol for your site, e.g. http://example.com
 # twitter_username: jekyllrb
 github_username:  EdwinHu233
 
