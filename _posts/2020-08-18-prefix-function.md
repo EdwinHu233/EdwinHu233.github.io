@@ -9,7 +9,7 @@ title: "前缀函数"
 
 给定长度为 $ n $ 的字符串 $ s[0:n] $ ，其前缀函数是一个数组 $ \pi $ ：
 
-$ \pi[i] = \max \\{ 0 \leq k \leq i: s[0:k] = s[i + 1 - k: i + 1] \\} $
+$ \pi[i] = \max \\{ k \in [0, i] : s[0:k] = s[i + 1 - k: i + 1] \\} $
 
 通俗地讲，$ \pi[i] $ 是 $ s[0:i + 1] $ 的相同的真前缀和真后缀的最大长度。
 
@@ -105,10 +105,79 @@ vector<int> prefix_function(const string &s) {
 
 ## 应用：字符串搜索
 
-问题的描述是：给定字符串 $ s, t $ ，要求在 $ t $ 中搜索 $ s $ 的所有出现位置（以起始地址为准）。
+问题的描述是：给定字符串 $ s, t $ ，长度分别为 $ n, m $ ，
+要求在 $ t $ 中搜索 $ s $ 的所有出现位置（以起始地址为准）。
 将前缀函数应用到这个问题上，就是著名的 KMP 算法了。
 
 思路很简单：用一个在 $ s, t $ 中均未出现的字符 $ x $ 将二者拼接起来，得到 $ t' = s x t $ ，然后计算前缀函数。
-若 $ \pi[i] = \| s \| $ ， 则说明 $ t'[i + 1 - \| s \|: i + 1] = s $ ，即 $ t[i - 2 \| s \| : i - \| s \|] = s $ 。
+若 $ \pi[i] = n $ ， 则说明 $ t'[i + 1 - n: i + 1] = s $ ，即 $ t[i - 2 n : i - n] = s $ 。
 
-根据之前的讨论，我们只需要保存 $ sx $ 即可，空间复杂度为 $ O(\| s \|) $ ，时间复杂度为 $ O(\| s \| + \| t \|) $
+根据之前的讨论，我们只需要保存 $ sx $ 即可，空间复杂度为 $ O(n) $ ，时间复杂度为 $ O(n + m) $
+
+## 应用：计算字符串周期
+
+对于字符串周期的定义是：
+给定的字符串 $ s $ ，长度为 $ n $ ，若 
+
+$ \exists p \in [1, n] , \forall i \in [0, n - p) , s[i] = s[i + p] $
+
+则称 $ p $ 为 $ s $ 的一个周期。
+
+（注意，这个定义不要求 $ s $ 由完整的若干个周期构成，即不一定有 $ p \|  n$ ）
+
+显然，$ s $ 有长度为 $ k $ 的相同真前缀和真后缀 $ \iff $ $ s $ 有周期 $ n - k $ 。
+因此，$ s $ 的所有周期为 $ n - \pi[n - 1], n - \pi[\pi[n - 1] - 1], \ldots $
+
+## 例题
+
+### UVA-455 Periodic Strings
+
+这道题基本就是计算字符串周期的模板题，只不过要求字符串必须有完整的若干个周期构成
+（以及，这道题的输入输出格式有点恶心）。
+
+{% highlight cpp %}
+#include <bits/stdc++.h>
+using namespace std;
+
+const int MAX = 85;
+char buf[MAX];
+int pi[MAX];
+
+int solve() {
+  scanf("%s", buf);
+  memset(pi, 0, sizeof(pi));
+
+  const int n = strlen(buf);
+
+  // compute pi
+  for (int i = 1; i < n; ++i) {
+    int j = pi[i - 1];
+    while (j > 0 && buf[i] != buf[j]) {
+      j = pi[j - 1];
+    }
+    if (buf[i] == buf[j]) {
+      ++j;
+    }
+    pi[i] = j;
+  }
+
+  // get the smallest period
+  int k = pi[n - 1];
+  while (n % (n - k) != 0) {
+    k = pi[k - 1];
+  }
+  return n - k;
+}
+
+int main() {
+  int tests;
+  scanf("%d", &tests);
+  while (tests--) {
+    printf("%d\n", solve());
+    if (tests) {
+      printf("\n");
+    }
+  }
+  return 0;
+}
+{% endhighlight %}
