@@ -86,22 +86,22 @@ void init_inv(vector<u64> &inv, u64 b, u64 m) {
 
 {% highlight cpp %}
 template <int B, int M> struct Hasher {
-  u64 b_pow[MAX], preffix_hash[MAX];
+  u64 b_pow[MAX], prefix_hash[MAX];
 
   void init(char *s, int len) {
-    b_pow[0] = 1, preffix_hash[0] = 0;
+    b_pow[0] = 1, prefix_hash[0] = 0;
     for (int i = 1; i <= len; ++i) {
       b_pow[i] = (b_pow[i - 1] * B) % M;
-      preffix_hash[i] =
-          (preffix_hash[i - 1] + (s[i - 1] - 'a' + 1) * b_pow[i - 1]) % M;
+      prefix_hash[i] =
+          (prefix_hash[i - 1] + (s[i - 1] - 'a' + 1) * b_pow[i - 1]) % M;
     }
   }
 
   u64 hash_diff(int i, int j) {
     // NOTE: must be careful here
     // otherwise the subtraction will underflow
-    u64 res = preffix_hash[j] + M;
-    res = (res - preffix_hash[i]) % M;
+    u64 res = prefix_hash[j] + M;
+    res = (res - prefix_hash[i]) % M;
     return res;
   }
 
