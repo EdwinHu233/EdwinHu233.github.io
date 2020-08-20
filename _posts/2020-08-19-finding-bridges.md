@@ -56,64 +56,192 @@ const int MAX = 1 << 10;
 
 int n;
 vector<vector<int>> g;
-int tin[MAX]; // -1: not visited
+int tin[MAX];  // -1: not visited
 int low[MAX];
 int clk;
 vector<pair<int, int>> ans;
 
 bool init() {
-  if (scanf("%d", &n) == EOF) {
-    return false;
-  }
-  g.clear();
-  g.resize(n);
-  for (int i = 0; i < n; ++i) {
-    int x, ne;
-    scanf("%d (%d)", &x, &ne);
-    for (int j = 0; j < ne; ++j) {
-      int y;
-      scanf("%d", &y);
-      g[x].push_back(y);
+    if (scanf("%d", &n) == EOF) return false;
+    g.clear();
+    g.resize(n);
+    for (int i = 0; i < n; ++i) {
+        int x, ne;
+        scanf("%d (%d)", &x, &ne);
+        for (int j = 0; j < ne; ++j) {
+            int y;
+            scanf("%d", &y);
+            g[x].push_back(y);
+        }
     }
-  }
-  memset(tin, -1, sizeof(tin));
-  clk = 0;
-  ans.clear();
-  return true;
+    memset(tin, -1, sizeof(tin));
+    clk = 0;
+    ans.clear();
+    return true;
 }
 
 void dfs(int u, int pa) {
-  low[u] = tin[u] = clk++;
-  for (int v : g[u]) {
-    if (v == pa) {
-      continue;
+    low[u] = tin[u] = clk++;
+    for (int v : g[u]) {
+        if (v == pa) continue;
+        if (tin[v] >= 0) {
+            low[u] = min(low[u], tin[v]);
+        } else {
+            dfs(v, u);
+            low[u] = min(low[u], low[v]);
+            if (low[v] == tin[v]) {
+                auto p = u < v ? make_pair(u, v) : make_pair(v, u);
+                ans.push_back(p);
+            }
+        }
     }
-    if (tin[v] >= 0) {
-      low[u] = min(low[u], tin[v]);
-    } else {
-      dfs(v, u);
-      low[u] = min(low[u], low[v]);
-      if (low[v] == tin[v]) {
-        auto p = u < v ? make_pair(u, v) : make_pair(v, u);
-        ans.push_back(p);
-      }
-    }
-  }
 }
 
 int main() {
-  while (init()) {
+    while (init()) {
+        for (int i = 0; i < n; ++i) {
+            if (tin[i] < 0) {
+                dfs(i, -1);
+            }
+        }
+        sort(ans.begin(), ans.end());
+        printf("%d critical links\n", int(ans.size()));
+        for (const auto &p : ans) {
+            printf("%d - %d\n", p.first, p.second);
+        }
+        printf("\n");
+    }
+}
+{% endhighlight %}
+
+### UVA-610
+
+题意：给定一个联通的无向图，将其转化为强联通的有向图；
+转化的规则是：尽可能多地把每条无向边变为一条单向边，
+否则把无向边变为平行的两条单向边。
+最后将转变后的边输出出来（若有多种转变方案，任意输出一种即可）。
+
+思路：首先在无向图上找到所有桥，这些桥只能变为两条平行的单向边；
+然后在无向图中删去所有桥，不断进行 DFS ，将剩余的无向边按照 DFS 时的方向变为单向边即可。
+
+（小技巧：这种以“边”为核心概念的题，最好定义一个 `Edge` 类）
+
+{% highlight cpp %}
+#include <bits/stdc++.h>
+using namespace std;
+
+const int MAX = 1024;
+
+struct Edge {
+    int src, dst;
+    int id, reverse_id;
+    bool printed, is_bridge;
+
+    Edge(int src, int dst, int id, int reverse_id)
+        : src(src),
+          dst(dst),
+          id(id),
+          reverse_id(reverse_id),
+          printed(false),
+          is_bridge(false) {}
+};
+
+int n;
+vector<Edge> es;
+vector<vector<int>> g;
+int tin[MAX];  // -1: not visited
+int low[MAX];
+int clk;
+
+// used when final outputing
+// if printed[u] == true, all of u's edges have been printed
+bool printed[MAX];
+
+bool init() {
+    int m;
+    scanf("%d%d", &n, &m);
+    if (n == 0) return false;
+
+    // reset all global variables
+    g.clear();
+    g.resize(n);
+    es.clear();
+    memset(tin, -1, sizeof(tin));
+    clk = 0;
+    memset(printed, 0, sizeof(printed));
+
+    for (int i = 0; i < m; ++i) {
+        int x, y;
+        scanf("%d%d", &x, &y);
+        --x, --y;
+        int sz = es.size();
+        es.push_back(Edge(x, y, sz, sz + 1));  // x->y: sz
+        es.push_back(Edge(y, x, sz + 1, sz));  // y->x: sz + 1
+        g[x].push_back(sz);
+        g[y].push_back(sz + 1);
+    }
+
+    return true;
+}
+
+void dfs(int u, int pa) {
+    tin[u] = low[u] = clk++;
+    for (int i : g[u]) {
+        auto &e = es[i];
+        int v = es[i].dst;
+        if (v == pa) continue;
+        if (tin[v] >= 0) {
+            low[u] = min(low[u], tin[v]);
+        } else {
+            dfs(v, u);
+            low[u] = min(low[u], low[v]);
+            if (low[v] == tin[v]) {
+                e.is_bridge = true;
+                es[e.reverse_id].is_bridge = true;
+            }
+        }
+    }
+}
+
+void print(int u) {
+    if (printed[u]) {
+        return;
+    }
+    printed[u] = true;
+    for (int i : g[u]) {
+        auto &e = es[i];
+        if (e.is_bridge || e.printed) continue;
+        int v = e.dst;
+        printf("%d %d\n", u + 1, v + 1);
+        e.printed = true;
+        es[e.reverse_id].printed = true;
+        print(v);
+    }
+}
+
+void solve() {
     for (int i = 0; i < n; ++i) {
-      if (tin[i] < 0) {
-        dfs(i, -1);
-      }
+        if (tin[i] < 0) {
+            dfs(i, -1);
+        }
     }
-    sort(ans.begin(), ans.end());
-    printf("%d critical links\n", int(ans.size()));
-    for (const auto &p : ans) {
-      printf("%d - %d\n", p.first, p.second);
+    for (int i = 0; i < n; ++i) {
+        print(i);
     }
-    printf("\n");
-  }
+    for (auto &e : es) {
+        if (e.is_bridge) {
+            int u = e.src, v = e.dst;
+            printf("%d %d\n", u + 1, v + 1);
+        }
+    }
+}
+
+int main() {
+    int tests = 0;
+    while (init()) {
+        printf("%d\n\n", ++tests);
+        solve();
+        printf("#\n");
+    }
 }
 {% endhighlight %}
