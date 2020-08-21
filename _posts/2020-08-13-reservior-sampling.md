@@ -24,40 +24,38 @@ title: "蓄水池采样"
 而是可以流式地不断读取数据。
 
 {% highlight cpp %}
-#include <random>
-
 // a pseudo stream data reader
 struct DataReader {
-  std::vector<int> data;
-  int k;
+    std::vector<int> data;
+    int k;
 
-  DataReader(int N) : data(N), k(0) {
-    for (int i = 0; i < N; ++i) {
-      data[i] = i;
+    DataReader(int N) : data(N), k(0) {
+        for (int i = 0; i < N; ++i) {
+            data[i] = i;
+        }
     }
-  }
 
-  bool has_next() { return k < data.size(); }
+    bool has_next() { return k < data.size(); }
 
-  int read_next() { return data[k++]; }
+    int read_next() { return data[k++]; }
 };
 
 void reservior_sample(DataReader &a, std::vector<int> &b) {
-  const auto K = b.size();
-  std::random_device rd;
-  std::mt19937 gen(rd());
+    const auto K = b.size();
+    std::random_device rd;
+    std::mt19937 gen(rd());
 
-  for (int i = 0; i < K; ++i) {
-    b[i] = a.read_next();
-  }
-
-  for (int i = K; a.has_next(); ++i) {
-    int x = a.read_next();
-    std::uniform_int_distribution<> dis(0, i);
-    int j = dis(gen);
-    if (j < K) {
-      b[j] = x;
+    for (int i = 0; i < K; ++i) {
+        b[i] = a.read_next();
     }
-  }
+
+    for (int i = K; a.has_next(); ++i) {
+        int x = a.read_next();
+        std::uniform_int_distribution<> dis(0, i);
+        int j = dis(gen);
+        if (j < K) {
+            b[j] = x;
+        }
+    }
 }
 {% endhighlight %}

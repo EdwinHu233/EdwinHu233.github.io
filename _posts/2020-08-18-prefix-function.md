@@ -144,40 +144,40 @@ char buf[MAX];
 int pi[MAX];
 
 int solve() {
-  scanf("%s", buf);
-  memset(pi, 0, sizeof(pi));
+    scanf("%s", buf);
+    memset(pi, 0, sizeof(pi));
 
-  const int n = strlen(buf);
+    const int n = strlen(buf);
 
-  // compute pi
-  for (int i = 1; i < n; ++i) {
-    int j = pi[i - 1];
-    while (j > 0 && buf[i] != buf[j]) {
-      j = pi[j - 1];
+    // compute pi
+    for (int i = 1; i < n; ++i) {
+        int j = pi[i - 1];
+        while (j > 0 && buf[i] != buf[j]) {
+            j = pi[j - 1];
+        }
+        if (buf[i] == buf[j]) {
+            ++j;
+        }
+        pi[i] = j;
     }
-    if (buf[i] == buf[j]) {
-      ++j;
-    }
-    pi[i] = j;
-  }
 
-  // get the smallest period
-  int k = pi[n - 1];
-  while (n % (n - k) != 0) {
-    k = pi[k - 1];
-  }
-  return n - k;
+    // get the smallest period
+    int k = pi[n - 1];
+    while (n % (n - k) != 0) {
+        k = pi[k - 1];
+    }
+    return n - k;
 }
 
 int main() {
-  int tests;
-  scanf("%d", &tests);
-  while (tests--) {
-    printf("%d\n", solve());
-    if (tests) {
-      printf("\n");
+    int tests;
+    scanf("%d", &tests);
+    while (tests--) {
+        printf("%d\n", solve());
+        if (tests) {
+            printf("\n");
+        }
     }
-  }
-  return 0;
+    return 0;
 }
 {% endhighlight %}

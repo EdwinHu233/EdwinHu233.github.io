@@ -85,37 +85,38 @@ void init_inv(vector<u64> &inv, u64 b, u64 m) {
 这种方法实际上可以应对大部分情况，完整实现代码如下：
 
 {% highlight cpp %}
-template <int B, int M> struct Hasher {
-  u64 b_pow[MAX], prefix_hash[MAX];
+template <int B, int M>
+struct Hasher {
+    u64 b_pow[MAX], prefix_hash[MAX];
 
-  void init(char *s, int len) {
-    b_pow[0] = 1, prefix_hash[0] = 0;
-    for (int i = 1; i <= len; ++i) {
-      b_pow[i] = (b_pow[i - 1] * B) % M;
-      prefix_hash[i] =
-          (prefix_hash[i - 1] + (s[i - 1] - 'a' + 1) * b_pow[i - 1]) % M;
+    void init(char *s, int len) {
+        b_pow[0] = 1, prefix_hash[0] = 0;
+        for (int i = 1; i <= len; ++i) {
+            b_pow[i] = (b_pow[i - 1] * B) % M;
+            prefix_hash[i] =
+                (prefix_hash[i - 1] + (s[i - 1] - 'a' + 1) * b_pow[i - 1]) % M;
+        }
     }
-  }
 
-  u64 hash_diff(int i, int j) {
-    // NOTE: must be careful here
-    // otherwise the subtraction will underflow
-    u64 res = prefix_hash[j] + M;
-    res = (res - prefix_hash[i]) % M;
-    return res;
-  }
-
-  bool cmpSubstring(int start1, int start2, int len) {
-    u64 h1 = hash_diff(start1, start1 + len);
-    u64 h2 = hash_diff(start2, start2 + len);
-    if (start2 > start1) {
-      // muliplication is okay if M * M < (1 << 64)
-      h1 = (h1 * b_pow[start2 - start1]) % M;
-    } else {
-      h2 = (h2 * b_pow[start1 - start2]) % M;
+    u64 hash_diff(int i, int j) {
+        // NOTE: must be careful here
+        // otherwise the subtraction will underflow
+        u64 res = prefix_hash[j] + M;
+        res = (res - prefix_hash[i]) % M;
+        return res;
     }
-    return h1 == h2;
-  }
+
+    bool cmpSubstring(int start1, int start2, int len) {
+        u64 h1 = hash_diff(start1, start1 + len);
+        u64 h2 = hash_diff(start2, start2 + len);
+        if (start2 > start1) {
+            // muliplication is okay if M * M < (1 << 64)
+            h1 = (h1 * b_pow[start2 - start1]) % M;
+        } else {
+            h2 = (h2 * b_pow[start1 - start2]) % M;
+        }
+        return h1 == h2;
+    }
 };
 {% endhighlight %}
 
