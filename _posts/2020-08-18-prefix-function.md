@@ -181,3 +181,63 @@ int main() {
     return 0;
 }
 {% endhighlight %}
+
+### SPOJ-NHAY: A Needle in the Haystack
+
+KMP 的模板题
+
+{% highlight cpp %}
+#include <bits/stdc++.h>
+using namespace std;
+
+char *s;
+int *pi;
+int n;
+
+bool init() {
+    if (scanf("%d", &n) == EOF) return false;
+    s = new char[n + 1];
+    pi = new int[n + 1];
+    memset(s, 0, (n + 1) * sizeof(char));
+    memset(pi, 0, (n + 1) * sizeof(int));
+    scanf("%s\n", s);
+    for (int i = 1; i <= n; ++i) {
+        int j = pi[i - 1];
+        while (j > 0 && s[i] != s[j]) {
+            j = pi[j - 1];
+        }
+        if (s[i] == s[j]) {
+            ++j;
+        }
+        pi[i] = j;
+    }
+    return true;
+}
+
+void solve() {
+    char c;
+    int i = 0;
+    int j = pi[n];
+    while (true) {
+        c = getchar();
+        if (c == '\n' || c == EOF) break;
+        while (j > 0 && c != s[j]) {
+            j = pi[j - 1];
+        }
+        if (c == s[j]) {
+            ++j;
+        }
+        if (j == n) {
+            printf("%d\n", i - n + 1);
+        }
+        ++i;
+    }
+    printf("\n");
+}
+
+int main() {
+    while (init()) {
+        solve();
+    }
+}
+{% endhighlight %}
