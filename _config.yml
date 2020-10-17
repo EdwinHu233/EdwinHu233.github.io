@@ -21,7 +21,7 @@
 title: Harbor
 email: hujingbo@pku.edu.cn
 description: >- # this means to ignore newlines until "baseurl:"
-    这是一个很菜的人的博客。
+    啊这
 baseurl: "" # the subpath of your site, e.g. /blog
 url: "https://edwinhu233.github.io" # the base hostname & protocol for your site, e.g. http://example.com
 # twitter_username: jekyllrb
