@@ -27,12 +27,17 @@ func MakeWorker(p *Pool) *Worker {
 		jobRequest: make(chan func()),
 	}
 	go func() {
-		for job := range w.jobRequest {
-			job()
-			p.mu.Lock()
-			p.idleWorkers = append(p.idleWorkers, w)
-			p.cond.Signal()
-			p.mu.Unlock()
+		for {
+			select {
+			case <-p.kill:
+				return
+			case job := <-w.jobRequest:
+				job()
+				p.mu.Lock()
+				p.idleWorkers = append(p.idleWorkers, w)
+				p.cond.Signal()
+				p.mu.Unlock()
+			}
 		}
 	}()
 	return w
