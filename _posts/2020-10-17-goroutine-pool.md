@@ -195,7 +195,20 @@ ok  	other	31.006s
 白白浪费有限的 CPU 资源。
 
 此外，对于需要获取其他有限资源的任务，这种 goroutine 池也是有意义的。
-例如操作系统对一个进程能够同时打开的文件数是有限制的
-（在 Linux 中，一个进程最多同时获取 1024 个文件描述符）。
+例如操作系统对一个进程能够同时打开的文件数是有限制的。
+在 Linux 中，“限制” 有 hard limit 和 soft limit 之分。
+二者都可以人为调节：前者只能减少；后者可以增加或减少，但不允许超过前者。
+在我的笔记本上查询到的结果是：
+
+```
+jingbo@harbor ~> uname -a
+Linux harbor 5.9.1-arch1-1 #1 SMP PREEMPT Sat, 17 Oct 2020 13:30:37 +0000 x86_64 GNU/Linux
+jingbo@harbor ~> ulimit -n
+1024
+jingbo@harbor ~> ulimit -nH
+524288
+```
+
+可以看到，默认情况下一个进程同时打开文件数量的 soft limit 是 1024, hard limit 是 524288 。
 如果无限制地创建 goroutine ，并且每个 goroutine 都要打开一个新文件的话，
 会迅速达到操作系统设置的上限。
