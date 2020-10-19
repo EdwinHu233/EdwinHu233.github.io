@@ -195,22 +195,7 @@ ok  	other	31.006s
 白白浪费有限的 CPU 资源。
 
 此外，对于需要获取其他有限资源的任务，这种 goroutine 池也是有意义的。
-例如操作系统对一个进程能够同时打开的文件数是有限制的。
-在 Linux 中，我们可以通过 `ulimit` 指令查看这个限制数：
-
-```
-jingbo@harbor ~> ulimit -aH
-Maximum size of core files created                           (kB, -c) unlimited
-Maximum size of a process’s data segment                     (kB, -d) unlimited
-Maximum size of files created by the shell                   (kB, -f) unlimited
-Maximum size that may be locked into memory                  (kB, -l) 64
-Maximum resident set size                                    (kB, -m) unlimited
-Maximum number of open file descriptors                          (-n) 524288
-Maximum stack size                                           (kB, -s) unlimited
-Maximum amount of cpu time in seconds                   (seconds, -t) unlimited
-Maximum number of processes available to a single user           (-u) 61396
-Maximum amount of virtual memory available to the shell      (kB, -v) unlimited
-```
-
+例如操作系统对一个进程能够同时打开的文件数是有限制的
+（在 Linux 中，一个进程最多同时获取 1024 个文件描述符）。
 如果无限制地创建 goroutine ，并且每个 goroutine 都要打开一个新文件的话，
 会迅速达到操作系统设置的上限。
